@@ -10,7 +10,9 @@
 	import IconButton from '@smui/icon-button';
 	import { Label, Icon } from '@smui/common';
 	import { Svg } from '@smui/common/elements';
-	import { mdiGithub, mdiWeb } from '@mdi/js';
+	import { mdiLogin, mdiLogout } from '@mdi/js';
+
+	import { loggedIn, setLoggedIn } from '../utils/store';
 
 	let topAppBar: TopAppBarComponentDev;
 
@@ -29,6 +31,16 @@
 			.querySelector<HTMLLinkElement>('link[href="/smui-dark.css"]')
 			?.insertAdjacentElement('afterend', themeLink);
 	}
+
+	$: icon = loggedIn ? mdiLogout : mdiLogin;
+
+	const handleClick = () => {
+		if (loggedIn) {
+			setLoggedIn(false);
+		} else {
+			setLoggedIn(true);
+		}
+	};
 </script>
 
 <TopAppBar bind:this={topAppBar} variant="standard">
@@ -37,14 +49,9 @@
 			<Title>My App</Title>
 		</Section>
 		<Section align="end" toolbar>
-			<IconButton aria-label="GitHub" href="https://github.com/hperrin/svelte-material-ui">
+			<IconButton aria-label="GitHub" onclick={handleClick}>
 				<Icon component={Svg} viewBox="0 0 24 24">
-					<path fill="currentColor" d={mdiGithub} />
-				</Icon>
-			</IconButton>
-			<IconButton aria-label="Demo Site" href="https://sveltematerialui.com">
-				<Icon component={Svg} viewBox="0 0 24 24">
-					<path fill="currentColor" d={mdiWeb} />
+					<path fill="currentColor" d={icon} />
 				</Icon>
 			</IconButton>
 		</Section>
