@@ -10,9 +10,11 @@
 	import IconButton from '@smui/icon-button';
 	import { Label, Icon } from '@smui/common';
 	import { Svg } from '@smui/common/elements';
-	import { mdiLogin, mdiLogout } from '@mdi/js';
+	import { mdiAccountPlus, mdiLogin, mdiLogout } from '@mdi/js';
 
+	import LoginDialog from '../Components/LoginDialog.svelte';
 	import { loggedIn, setLoggedIn } from '../utils/store';
+	import RegisterDialog from '../Components/RegisterDialog.svelte';
 
 	let topAppBar: TopAppBarComponentDev;
 
@@ -32,15 +34,24 @@
 			?.insertAdjacentElement('afterend', themeLink);
 	}
 
-	$: icon = loggedIn ? mdiLogout : mdiLogin;
+	let icon = mdiLogout;
+	let isLoggedIn = false;
+	loggedIn.subscribe((loggedIn) => {
+		icon = loggedIn ? mdiLogin : mdiLogout;
+		isLoggedIn = loggedIn;
+	});
+	let loginDialogOpen = false;
+	let registerDialogOpen = false;
 
-	const handleClick = () => {
-		if (loggedIn) {
-			setLoggedIn(false);
+	const handleLoginClick = () => {
+		if (!isLoggedIn) {
+			loginDialogOpen = true;
 		} else {
-			setLoggedIn(true);
+			setLoggedIn(false);
 		}
 	};
+
+	const handleRegisterClick = () => (registerDialogOpen = true);
 </script>
 
 <TopAppBar bind:this={topAppBar} variant="standard">
@@ -49,7 +60,14 @@
 			<Title>My App</Title>
 		</Section>
 		<Section align="end" toolbar>
-			<IconButton aria-label="GitHub" onclick={handleClick}>
+			{#if !isLoggedIn}
+				<IconButton on:click={handleRegisterClick}>
+					<Icon component={Svg} viewBox="0 0 24 24">
+						<path fill="currentColor" d={mdiAccountPlus} />
+					</Icon>
+				</IconButton>
+			{/if}
+			<IconButton on:click={handleLoginClick}>
 				<Icon component={Svg} viewBox="0 0 24 24">
 					<path fill="currentColor" d={icon} />
 				</Icon>
@@ -66,3 +84,6 @@
 		</Button>
 	</div>
 </AutoAdjust>
+
+<LoginDialog bind:open={loginDialogOpen} />
+<RegisterDialog bind:open={registerDialogOpen} />
