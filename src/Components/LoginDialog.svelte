@@ -7,6 +7,8 @@
 
 	import { setLoggedIn } from '../utils/store';
 	import mockAsyncFunction from '../utils/async';
+import axios from 'axios';
+import config from '../config';
 
 	export let open = false;
 	let username = '';
@@ -24,17 +26,15 @@
 		}
 		fieldError = '';
 		// TODO: login
-		const fakeLogin = async (flag: boolean, msg: string) => {
-			const res = await mockAsyncFunction({ username, password }, 500, { flag, msg });
-			if (res.flag) {
+		axios.post(config.apiBaseUrl + '/login', {
+			username: username,
+			password: password
+		}).then (() => {
 				setLoggedIn(true);
 				open = false;
-			} else {
-				fieldError = res.msg;
-			}
-		};
-
-		fakeLogin(true, '登录成功');
+		}).catch(() => {
+			fieldError = '登录失败，可能是用户名或密码错误';
+		});
 	};
 </script>
 

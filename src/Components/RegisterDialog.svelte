@@ -4,10 +4,12 @@
 	import TextField from '@smui/textfield';
 	import Grid, { Cell } from '@smui/layout-grid';
 	import IconButton from '@smui/icon-button';
+	import axios from 'axios';
 
 	import { setLoggedIn } from '../utils/store';
 
-	import mockAsyncFunction from '../utils/async';
+	// import mockAsyncFunction from '../utils/async';
+	import config from '../config';
 
 	export let open = false;
 	let username = '';
@@ -35,21 +37,22 @@
 			return;
 		}
 		fieldError = '';
-		// TODO: 注册
-		const fakeRegister = async (flag: boolean, msg: string) => {
-			const res = await mockAsyncFunction({ username, password, email }, 500, { flag, msg });
-			if (!res.flag) {
-				fieldError = msg;
-			}
-		};
-
-		fakeRegister(false, '用户名已经存在！');
+		
+		axios
+			.post(config.apiBaseUrl + '/register', { username, email, password })
+			.then(() => {
+				setLoggedIn(true);
+				open = false;
+			})
+			.catch(() => {
+				fieldError = '注册失败，可能用户名或邮箱已存在';
+			});
 	};
 </script>
 
 <Dialog bind:open scrimClickAction="">
 	<Header>
-		<Title class="dlg-title">登录</Title>
+		<Title class="dlg-title">注册</Title>
 		<IconButton class="material-icons btn-close" on:click={() => (open = false)}>close</IconButton>
 	</Header>
 	<Content>
