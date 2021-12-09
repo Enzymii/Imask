@@ -15,6 +15,8 @@
 	import LoginDialog from '../Components/LoginDialog.svelte';
 	import { loggedIn, setLoggedIn } from '../utils/store';
 	import RegisterDialog from '../Components/RegisterDialog.svelte';
+	import axios from 'axios';
+	import config from '../config';
 
 	let topAppBar: TopAppBarComponentDev;
 
@@ -43,6 +45,17 @@
 	let loginDialogOpen = false;
 	let registerDialogOpen = false;
 
+	const autoLoginAction = async (): Promise<string> => {
+		const { data } = await axios.get(config.apiBaseUrl + '/status', { withCredentials: true });
+
+		if (data.username.length > 0) {
+			setLoggedIn(true);
+		}
+		return data.username;
+	};
+
+	let autoLogin = autoLoginAction();
+
 	const handleLoginClick = () => {
 		if (!isLoggedIn) {
 			loginDialogOpen = true;
@@ -56,33 +69,36 @@
 
 <TopAppBar bind:this={topAppBar} variant="standard">
 	<Row>
-		<Section>
-			<Title>My App</Title>
-		</Section>
+		<Section><Title>Imask</Title></Section>
 		<Section align="end" toolbar>
-			{#if !isLoggedIn}
-				<IconButton on:click={handleRegisterClick}>
+			{#await autoLogin then username}
+				{#if !isLoggedIn}
+					<IconButton on:click={handleRegisterClick}>
+						<Icon component={Svg} viewBox="0 0 24 24">
+							<path fill="currentColor" d={mdiAccountPlus} />
+						</Icon>
+					</IconButton>
+				{:else}
+					{username.slice(0, 1)}
+				{/if}
+
+				<IconButton on:click={handleLoginClick}>
 					<Icon component={Svg} viewBox="0 0 24 24">
-						<path fill="currentColor" d={mdiAccountPlus} />
+						<path fill="currentColor" d={icon} />
 					</Icon>
 				</IconButton>
-			{/if}
-			<IconButton on:click={handleLoginClick}>
-				<Icon component={Svg} viewBox="0 0 24 24">
-					<path fill="currentColor" d={icon} />
-				</Icon>
-			</IconButton>
+			{/await}
 		</Section>
 	</Row>
 </TopAppBar>
 
 <AutoAdjust {topAppBar} style="display: flex; justify-content: space-between;">
 	<div class="container"><slot /></div>
-	<div class="container">
+	<!-- <div class="container">
 		<Button on:click={switchTheme}>
 			<Label>{lightTheme ? 'Lights off' : 'Lights on'}</Label>
 		</Button>
-	</div>
+	</div> -->
 </AutoAdjust>
 
 <LoginDialog bind:open={loginDialogOpen} />
