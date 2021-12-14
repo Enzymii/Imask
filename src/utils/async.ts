@@ -1,4 +1,5 @@
 import axios from "axios";
+import { nanoid } from "nanoid";
 import config from '../config';
 
 interface FileInfo {
@@ -8,7 +9,7 @@ interface FileInfo {
 
 const uploadSingleFile = async (file: File) => {
 	const formData = new FormData();
-	const fileName = `${new Date().getTime()}_${file.name}`;
+	const fileName = `${nanoid()}`;
 
 	const { OSSAccessKeyId, policy, Signature } = (
 		await axios.get(config.apiBaseUrl + '/upload_url', {
@@ -27,4 +28,5 @@ const uploadSingleFile = async (file: File) => {
 	return { name: fileName, type: file.type };
 };
 
-export { uploadSingleFile, FileInfo };
+export { uploadSingleFile };
+export type { FileInfo };

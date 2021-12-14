@@ -22,7 +22,7 @@
 
 <Card padded class="img">
 	<Content on:click={setVideo}>
-		<video muted loop id="video">
+		<video muted loop id="video" crossorigin="anonymous">
 			<source src={url} {type} />
 			<track kind="captions" />
 		</video>

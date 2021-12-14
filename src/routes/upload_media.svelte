@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { fly } from 'svelte/transition';
 
-	import Button from '@smui/button/src/Button.svelte';
+	import Button from '@smui/button';
 	import LayoutGrid, { Cell } from '@smui/layout-grid';
 	import { Title } from '@smui/top-app-bar';
+	import IconButton from '@smui/icon-button';
+
 	import axios from 'axios';
 
 	import ImageDisplay from '../Components/ImageDisplay.svelte';
@@ -25,7 +27,6 @@
 				console.log('all uploaded');
 				await axios.post(config.apiBaseUrl + '/uploaded', fileName, { withCredentials: true });
 				filesToUpload = [];
-				getMedia = getMediaAction();
 			})
 			.catch((err) => {
 				console.log(err);
@@ -98,7 +99,12 @@
 		</LayoutGrid>
 	</div>
 	<div class="sub-title-bar">
-		<Title>图片列表</Title>
+		<Title>
+			图片列表
+			<IconButton class="material-icons" on:click={() => (getMedia = getMediaAction())}>
+				refresh
+			</IconButton>
+		</Title>
 		<Button>创建标注任务</Button>
 	</div>
 	{#await getMedia}
