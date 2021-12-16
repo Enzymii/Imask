@@ -102,3 +102,9 @@
 
 <LoginDialog bind:open={loginDialogOpen} />
 <RegisterDialog bind:open={registerDialogOpen} />
+
+<style>
+	.container {
+		width: 100vw;
+	}
+</style>
