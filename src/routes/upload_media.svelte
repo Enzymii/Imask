@@ -11,6 +11,7 @@
 	import ImageDisplay from '../Components/ImageDisplay.svelte';
 	import VideoDisplay from '../Components/VideoDisplay.svelte';
 	import VideoEditDialog from '../Components/VideoEditDialog.svelte';
+	import TaskNameDialog from '../Components/TaskNameDialog.svelte';
 
 	import config from '../config';
 	import { uploadSingleFile } from '../utils/async';
@@ -33,6 +34,12 @@
 			});
 	};
 
+	let filesToUpload: File[] = [];
+	interface ChosenArrayItem {
+		name: string;
+		chosen: boolean;
+	}
+	let isChosenArray: ChosenArrayItem[] = [];
 	const getMediaAction = async () => {
 		const { data: fileNameData } = await axios.get<FileInfo[]>(config.apiBaseUrl + '/collections', {
 			withCredentials: true
@@ -48,12 +55,12 @@
 				).data;
 			})
 		);
-		isChosenArray = new Array(urls.length).fill(false);
+		isChosenArray = fileNameData
+			.filter(({ type }) => /^image/.test(type))
+			.map(({ name }) => ({ name, chosen: false }));
 		return urls.map(({ url }, id) => ({ url, ...fileNameData[id] }));
 	};
 
-	let filesToUpload: File[] = [];
-	let isChosenArray: boolean[] = [];
 	let getMedia = getMediaAction();
 
 	const onMediaUpload = (e: Event & { currentTarget: EventTarget & HTMLInputElement }) => {
@@ -66,13 +73,15 @@
 
 	let hasChosen = false;
 	const switchArray = (id: number) => {
-		isChosenArray[id] = !isChosenArray[id];
+		isChosenArray[id].chosen = !isChosenArray[id].chosen;
 		isChosenArray = [...isChosenArray];
-		hasChosen = isChosenArray.some((item) => item);
+		hasChosen = isChosenArray.some(({ chosen }) => chosen);
 	};
 
+	let taskNameDlgOpen = false;
 	const publishChosen = () => {
 		// TODO: pop up a dialog to confirm
+		taskNameDlgOpen = true;
 	};
 
 	let onVideoEdit = false;
@@ -105,18 +114,18 @@
 				refresh
 			</IconButton>
 		</Title>
-		<Button>创建标注任务</Button>
+		<p class="tips">Tips: 选中一些图片以创建标注任务</p>
 	</div>
 	{#await getMedia}
 		图片加载中...
 	{:then medias}
 		<LayoutGrid>
 			{#each medias.filter(({ type }) => /^image/.test(type)) as media, id}
-				<Cell span={4}>
+				<Cell span={3}>
 					<ImageDisplay
 						url={media.url}
 						name={media.name}
-						flag={isChosenArray[id]}
+						flag={isChosenArray[id].chosen}
 						switcher={() => switchArray(id)}
 					/>
 				</Cell>
@@ -139,7 +148,7 @@
 	{:then medias}
 		<LayoutGrid>
 			{#each medias.filter(({ type }) => /^video/.test(type)) as media}
-				<Cell span={4}>
+				<Cell span={3}>
 					<VideoDisplay {...media} onClick={selectVideo} />
 				</Cell>
 			{/each}
@@ -150,6 +159,10 @@
 </div>
 
 <VideoEditDialog bind:open={onVideoEdit} />
+<TaskNameDialog
+	bind:open={taskNameDlgOpen}
+	imgs={isChosenArray.filter(({ chosen }) => chosen).map(({ name }) => name)}
+/>
 
 <style>
 	:global(.main-title) {
