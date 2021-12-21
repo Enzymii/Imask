@@ -1,5 +1,5 @@
-import axios from "axios";
-import { nanoid } from "nanoid";
+import axios from 'axios';
+import { nanoid } from 'nanoid';
 import config from '../config';
 
 interface FileInfo {
@@ -28,5 +28,13 @@ const uploadSingleFile = async (file: File) => {
 	return { name: fileName, type: file.type };
 };
 
-export { uploadSingleFile };
+const getDownloadUrl = async ({ name }: FileInfo) =>
+	(
+		await axios.get<{ url: string }>(config.apiBaseUrl + '/download_url', {
+			params: { filename: name },
+			withCredentials: true
+		})
+	).data;
+
+export { uploadSingleFile, getDownloadUrl };
 export type { FileInfo };

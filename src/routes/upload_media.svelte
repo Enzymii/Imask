@@ -14,7 +14,7 @@
 	import TaskNameDialog from '../Components/TaskNameDialog.svelte';
 
 	import config from '../config';
-	import { uploadSingleFile } from '../utils/async';
+	import { getDownloadUrl, uploadSingleFile } from '../utils/async';
 	import type { FileInfo } from '../utils/async';
 	import { setTargetVideo } from '../utils/store';
 
@@ -45,16 +45,7 @@
 			withCredentials: true
 		});
 
-		const urls = await Promise.all(
-			fileNameData.map(async ({ name }) => {
-				return (
-					await axios.get<{ url: string }>(config.apiBaseUrl + '/download_url', {
-						params: { filename: name },
-						withCredentials: true
-					})
-				).data;
-			})
-		);
+		const urls = await Promise.all(fileNameData.map(getDownloadUrl));
 		isChosenArray = fileNameData
 			.filter(({ type }) => /^image/.test(type))
 			.map(({ name }) => ({ name, chosen: false }));
