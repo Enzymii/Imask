@@ -4,29 +4,12 @@
 	import { onMount } from 'svelte';
 	import { Annotorious } from '@recogito/annotorious';
 	import Button from '@smui/button';
-	import { annotation } from '../utils/store';
 
-	export let imgUrl;
-	export let show;
-	export let id;
-	let anno;
 	let polygon = false;
-	let ref;
+	let anno;
 	onMount(() => {
-		anno = new Annotorious({ image: ref });
+		anno = new Annotorious({ image: 'image' });
 		anno.setDrawingTool('rect');
-
-		const updateAnnotationStore = () => {
-			console.log('aaaa');
-			const newAnno = anno.getAnnotations();
-			const tmp = [...$annotation];
-			tmp[id] = newAnno;
-			$annotation = tmp;
-		};
-
-		anno.on('createAnnotation', updateAnnotationStore);
-		anno.on('updateAnnotation', updateAnnotationStore);
-		anno.on('deleteAnnotation', updateAnnotationStore);
 	});
 
 	const toggleTool = () => {
@@ -35,7 +18,7 @@
 	};
 </script>
 
-<div class={show || 'hide'}>
+<div>
 	<div class="btn-group">
 		<Button variant="raised" on:click={toggleTool}>
 			{#if polygon}
@@ -50,8 +33,15 @@
 	</div>
 
 	<div class="img-container">
-		<img bind:this={ref} id="image" src={imgUrl} alt="Google" title="Google" />
+		<img
+			id="image"
+			src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png"
+			alt="Google"
+			title="Google"
+		/>
 	</div>
+
+	<Button on:click={() => console.log(anno.getAnnotations())}>完成</Button>
 </div>
 
 <style>
@@ -66,9 +56,5 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
-	}
-
-	.hide {
-		display: none;
 	}
 </style>

@@ -11,5 +11,3 @@
 </Button>
 
 <AnnotateDialog open={true} />
-
-<AnnotationItem />

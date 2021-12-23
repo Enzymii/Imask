@@ -9,6 +9,9 @@
 	import Cell from '@smui/layout-grid/src/Cell.svelte';
 	import { getDownloadUrl } from '../utils/async';
 	import type { FileInfo } from '../utils/async';
+	import AnnotationItem from './AnnotationItem.svelte';
+	import { annotation } from '../utils/store';
+
 	export let open = false;
 	let curTask: Partial<Task> = {};
 	let imgId = 0;
@@ -17,6 +20,7 @@
 
 	const containerStyle = 'width: 80vw;';
 	const style = 'max-width: 100vw;width: 100%;height: 90vh;';
+	const stepText = ['开始标注', '标注完成'];
 
 	interface Task {
 		ID?: number;
@@ -43,9 +47,24 @@
 	};
 
 	const getTasks = getTasksAction();
+
+	const nextStep = () => {
+		if (step === 0) {
+			step = 1;
+		} else if (step === 1) {
+			console.log($annotation);
+			open = false;
+		}
+	};
 </script>
 
-<Dialog bind:open container$style={containerStyle} surface$style={style}>
+<Dialog
+	bind:open
+	container$style={containerStyle}
+	surface$style={style}
+	scrimClickAction=""
+	escapeKeyAction=""
+>
 	<Header>
 		<Title>创建新的标注</Title>
 	</Header>
@@ -75,15 +94,6 @@
 							</Cell>
 						{/each}
 					</LayoutGrid>
-					<Button
-						on:click={() => (step = 1)}
-						variant="raised"
-						color="primary"
-						class="next-step"
-						disabled={curTask.ID === undefined}
-					>
-						开始标注！
-					</Button>
 				{/await}
 			</div>
 		{:else}
@@ -106,7 +116,21 @@
 			{#if contentArray.length > 0}
 				<span>{imgId + 1} / {contentArray.length}</span>
 			{/if}
+			{#each contentArray as content, id}
+				{#await getDownloadUrl({ name: content, type: 'image/png' }) then url}
+					<AnnotationItem imgUrl={url.url} {id} show={id === imgId} />
+				{/await}
+			{/each}
 		{/if}
+		<Button
+			on:click={nextStep}
+			variant="raised"
+			color="primary"
+			class="next-step"
+			disabled={curTask.ID === undefined}
+		>
+			{stepText[step]}
+		</Button>
 	</Content>
 </Dialog>
 
