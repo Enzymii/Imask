@@ -12,7 +12,9 @@
 	import AnnotationItem from './AnnotationItem.svelte';
 	import { annotation } from '../utils/store';
 
-	export let open = false;
+	export let open: boolean;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	export let tasks: any[];
 	let curTask: Partial<Task> = {};
 	let imgId = 0;
 	let contentArray: string[] = [];
@@ -30,12 +32,6 @@
 		CreateAt: string;
 	}
 
-	const getTasksAction = async () => {
-		return (
-			await axios.get<Partial<Task>[]>(config.apiBaseUrl + '/task', { withCredentials: true })
-		).data;
-	};
-
 	const getDownloadUrlAction = async (info: FileInfo) => {
 		return (await getDownloadUrl(info)).url;
 	};
@@ -46,13 +42,20 @@
 		imgId = 0;
 	};
 
-	const getTasks = getTasksAction();
-
-	const nextStep = () => {
+	const nextStep = async () => {
 		if (step === 0) {
 			step = 1;
 		} else if (step === 1) {
-			console.log($annotation);
+			await axios.post(
+				config.apiBaseUrl + '/annotation/create',
+				{ taskId: curTask.ID, json: JSON.stringify($annotation) },
+				{ withCredentials: true }
+			);
+
+			// recover state data and store
+			annotation.set([]);
+			curTask = {};
+			step = 0;
 			open = false;
 		}
 	};
@@ -71,30 +74,28 @@
 	<Content>
 		{#if step === 0}
 			<div>
-				{#await getTasks then tasks}
-					<Select
-						class="task-sel"
-						on:MDCSelect:change={(e) => refreshSelectedTask(tasks, e.detail.value)}
-						label="选择一个标注任务"
-					>
-						{#each tasks as task}
-							<Option value={task.ID?.toString()}>@{task.AuthorId} - {task.Name}</Option>
-						{/each}
-					</Select>
+				<Select
+					class="task-sel"
+					on:MDCSelect:change={(e) => refreshSelectedTask(tasks, e.detail.value)}
+					label="选择一个标注任务"
+				>
+					{#each tasks as task}
+						<Option value={task.ID?.toString()}>@{task.AuthorId} - {task.Name}</Option>
+					{/each}
+				</Select>
 
-					<div class="subtitle">
-						图片预览: {#if contentArray.length > 3}（仅显示前3张）{/if}
-					</div>
-					<LayoutGrid>
-						{#each contentArray.slice(0, 3) as img}
-							<Cell span={4}>
-								{#await getDownloadUrlAction({ name: img, type: 'image/png' }) then url}
-									<ImageDisplay {url} name={img} flag={false} switcher={() => ({})} />
-								{/await}
-							</Cell>
-						{/each}
-					</LayoutGrid>
-				{/await}
+				<div class="subtitle">
+					图片预览: {#if contentArray.length > 3}（仅显示前3张）{/if}
+				</div>
+				<LayoutGrid>
+					{#each contentArray.slice(0, 3) as img}
+						<Cell span={4}>
+							{#await getDownloadUrlAction({ name: img, type: 'image/png' }) then url}
+								<ImageDisplay {url} name={img} flag={false} switcher={() => ({})} />
+							{/await}
+						</Cell>
+					{/each}
+				</LayoutGrid>
 			</div>
 		{:else}
 			<Button
