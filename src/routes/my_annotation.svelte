@@ -43,7 +43,6 @@
 		<Icon class="material-icons">add</Icon>
 		创建新的标注
 	</Button>
-	<Button class="btngrpbtn" variant="raised" color="secondary">导出一个标注</Button>
 </div>
 
 {#await getTasks then tasks}
