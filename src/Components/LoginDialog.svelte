@@ -31,7 +31,10 @@
 				password: password
 			})
 			.then(() => {
-				setLoggedIn(true);
+				setLoggedIn(username);
+				document.cookie = `username=${username}; path=/; expires=${new Date(
+					Date.now() + 1000 * 60 * 60 * 24 * 7
+				).toUTCString()}`;
 				open = false;
 			})
 			.catch(() => {

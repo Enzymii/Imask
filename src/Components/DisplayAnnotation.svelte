@@ -14,7 +14,7 @@
 
 	onMount(async () => {
 		// const myAnno = JSON.parse(annotation);
-		anno = new Annotorious({ image: ref, readonly: true });
+		anno = new Annotorious({ image: ref, readOnly: true });
 		anno.setAnnotations(annotation);
 	});
 </script>
@@ -22,3 +22,9 @@
 <div transition:slide>
 	<img bind:this={ref} src={imgUrl} alt={altMsg} />
 </div>
+
+<style>
+	img {
+		max-width: calc(100vw - 6rem);
+	}
+</style>

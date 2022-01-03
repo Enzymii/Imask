@@ -36,10 +36,15 @@
 	let open = false;
 </script>
 
-<Button variant="raised" color="primary" on:click={() => (open = true)}>
-	<Icon class="material-icons">add</Icon>
-	创建新的标注
-</Button>
+<div class="mdc-typography--headline3">我的标注</div>
+
+<div class="button-group new">
+	<Button class="btngrpbtn" variant="raised" color="primary" on:click={() => (open = true)}>
+		<Icon class="material-icons">add</Icon>
+		创建新的标注
+	</Button>
+	<Button class="btngrpbtn" variant="raised" color="secondary">导出一个标注</Button>
+</div>
 
 {#await getTasks then tasks}
 	{#await getAnnotation() then annotations}
@@ -48,9 +53,20 @@
 				img={JSON.parse(tasks.find((task) => task.ID === annotation.TaskID)?.Content ?? '[]')}
 				taskName={tasks.find((t) => t.ID === annotation.TaskID)?.Name ?? ''}
 				anno={annotation}
+				isJudging={false}
 			/>
 		{/each}
 	{/await}
 
 	<AnnotateDialog bind:open {tasks} />
 {/await}
+
+<style>
+	:global(.new) {
+		margin-top: 16px;
+	}
+
+	:global(.btngrpbtn) {
+		margin-right: 8px;
+	}
+</style>

@@ -16,6 +16,7 @@
 	import RegisterDialog from '../Components/RegisterDialog.svelte';
 	import axios from 'axios';
 	import config from '../config';
+	import RouterDrawer from '../Components/RouterDrawer.svelte';
 
 	let topAppBar: TopAppBarComponentDev;
 
@@ -36,7 +37,7 @@
 	// }
 
 	let icon = mdiLogout;
-	let isLoggedIn = false;
+	let isLoggedIn = '';
 	loggedIn.subscribe((loggedIn) => {
 		icon = loggedIn ? mdiLogin : mdiLogout;
 		isLoggedIn = loggedIn;
@@ -48,7 +49,7 @@
 		const { data } = await axios.get(config.apiBaseUrl + '/status', { withCredentials: true });
 
 		if (data.username.length > 0) {
-			setLoggedIn(true);
+			setLoggedIn(data.username);
 		}
 		return data.username;
 	};
@@ -59,37 +60,44 @@
 		if (!isLoggedIn) {
 			loginDialogOpen = true;
 		} else {
-			setLoggedIn(false);
+			setLoggedIn('');
 		}
 	};
 
 	const handleRegisterClick = () => (registerDialogOpen = true);
+
+	let drawerOpen = false;
 </script>
 
 <TopAppBar bind:this={topAppBar} variant="standard">
 	<Row>
-		<Section><Title>Imask</Title></Section>
+		<Section>
+			<IconButton class="material-icons" on:click={() => (drawerOpen = true)}>list</IconButton>
+			<Title>Imask</Title>
+		</Section>
 		<Section align="end" toolbar>
 			{#await autoLogin then username}
-				{#if !isLoggedIn}
-					<IconButton on:click={handleRegisterClick}>
-						<Icon component={Svg} viewBox="0 0 24 24">
-							<path fill="currentColor" d={mdiAccountPlus} />
-						</Icon>
-					</IconButton>
-				{:else}
-					{username.slice(0, 1)}
+				{#if isLoggedIn.length > 0}
+					{isLoggedIn.slice(0, 1)}
 				{/if}
-
-				<IconButton on:click={handleLoginClick}>
+			{/await}
+			{#if isLoggedIn.length < 1}
+				<IconButton on:click={handleRegisterClick}>
 					<Icon component={Svg} viewBox="0 0 24 24">
-						<path fill="currentColor" d={icon} />
+						<path fill="currentColor" d={mdiAccountPlus} />
 					</Icon>
 				</IconButton>
-			{/await}
+			{/if}
+			<IconButton on:click={handleLoginClick}>
+				<Icon component={Svg} viewBox="0 0 24 24">
+					<path fill="currentColor" d={icon} />
+				</Icon>
+			</IconButton>
 		</Section>
 	</Row>
 </TopAppBar>
+
+<RouterDrawer bind:open={drawerOpen} />
 
 <AutoAdjust {topAppBar} style="display: flex; justify-content: space-between;">
 	<div class="container"><slot /></div>

@@ -1,7 +1,7 @@
 import { writable } from 'svelte/store';
 
-export const loggedIn = writable(false);
-export const setLoggedIn = (value: boolean) => {
+export const loggedIn = writable('');
+export const setLoggedIn = (value: string) => {
 	loggedIn.set(value);
 };
 
